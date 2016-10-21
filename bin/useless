@@ -15,6 +15,7 @@ EOS
   # opt :volume, "Volume level", :default => 3.0
   # opt :iters, "Number of iterations", :default => 5
 end
+Trollop::educate if opts == {}
 Trollop::die :file, "must exist" unless File.exist?(opts[:file]) if opts[:file]
 Trollop::die :file, "can't be passed if pattern is passed" if opts[:file] && opts[:pattern]
 
@@ -24,9 +25,8 @@ files = [opts[:file]] if opts[:file]
 files.each do |file|
   content = File.read(file)
 
-  content.each_line.map! { |line| line == "\n" || line == "\t\n" ? line : "\# " + line }
+  content.each_line.map! { |line| line == "\n" || line == "\t\n" ? line : "\# " + line }.join('')
 
   File.write(file, content)
 end
 
-Trollop::educate if ARGV.empty?
