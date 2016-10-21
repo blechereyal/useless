@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 require 'trollop'
+require 'pry'
 opts = Trollop::options do
   version "useless 0.0.1 (c) 2016 Blecher Eyal"
   banner <<-EOS
@@ -9,13 +10,12 @@ Usage:
   useless [options]
 where [options] are:
 EOS
-  opt :pattern, "Pattern to search files to comment"
-  opt :file, "File to comment",
-        :type => String
+  opt :pattern, "Pattern to search files to comment", :type => String
+  opt :file, "File to comment", :type => String
   # opt :volume, "Volume level", :default => 3.0
   # opt :iters, "Number of iterations", :default => 5
 end
-Trollop::educate if opts == {}
+Trollop::educate unless opts[:file] || opts[:pattern]
 Trollop::die :file, "must exist" unless File.exist?(opts[:file]) if opts[:file]
 Trollop::die :file, "can't be passed if pattern is passed" if opts[:file] && opts[:pattern]
 
@@ -23,10 +23,11 @@ files = Dir.glob(opts[:pattern]) if opts[:pattern]
 files = [opts[:file]] if opts[:file]
 
 files.each do |file|
+  next if File.directory?(file)
+  puts file
   content = File.read(file)
 
-  content.each_line.map! { |line| line == "\n" || line == "\t\n" ? line : "\# " + line }.join('')
+  content = content.each_line.map { |line| line == "\n" || line == "\t\n" ? line : "\# " + line }.join('')
 
   File.write(file, content)
 end
-
