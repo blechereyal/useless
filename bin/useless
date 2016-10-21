@@ -1,22 +1,32 @@
 #!/usr/bin/env ruby
 require 'trollop'
 opts = Trollop::options do
-  version "useless 1.2.3 (c) 2008 William Morgan"
+  version "useless 0.0.1 (c) 2016 Blecher Eyal"
   banner <<-EOS
-Test is an awesome program that does something very, very important.
+Useless lets you get rid of useless code by detecting the language and using comments to get rid of it.
 
 Usage:
-       test [options] <filenames>+
+  useless [options]
 where [options] are:
 EOS
-
-  opt :ignore, "Ignore incorrect values"
-  opt :file, "Extra data filename to read in, with a very long option description like this one",
+  opt :pattern, "Pattern to search files to comment"
+  opt :file, "File to comment",
         :type => String
-  opt :volume, "Volume level", :default => 3.0
-  opt :iters, "Number of iterations", :default => 5
+  # opt :volume, "Volume level", :default => 3.0
+  # opt :iters, "Number of iterations", :default => 5
 end
-Trollop::die :volume, "must be non-negative" if opts[:volume] < 0
 Trollop::die :file, "must exist" unless File.exist?(opts[:file]) if opts[:file]
+Trollop::die :file, "can't be passed if pattern is passed" if opts[:file] && opts[:pattern]
+
+files = Dir.glob(opts[:pattern]) if opts[:pattern]
+files = [opts[:file]] if opts[:file]
+
+files.each do |file|
+  content = File.read(file)
+
+  content.each_line.map! { |line| line == "\n" || line == "\t\n" ? line : "\# " + line }
+
+  File.write(file, content)
+end
 
 Trollop::educate if ARGV.empty?
