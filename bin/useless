@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
-require 'trollop'
-require 'pry'
+require 'bundler/setup'
+
+require 'useless'
 opts = Trollop::options do
   version "useless 0.0.1 (c) 2016 Blecher Eyal"
   banner <<-EOS
@@ -24,10 +25,12 @@ files = [opts[:file]] if opts[:file]
 
 files.each do |file|
   next if File.directory?(file)
-  puts file
+
+  lang_name = LanguageSniffer.detect(file).language.name
   content = File.read(file)
 
-  content = content.each_line.map { |line| line == "\n" || line == "\t\n" ? line : "\# " + line }.join('')
+  # content = content.each_line.map { |line| line == "\n" || line == "\t\n" ? line : "\# " + line }.join('')
+  Commenter.new(content, lang_name)
 
   File.write(file, content)
 end
