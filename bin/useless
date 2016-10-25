@@ -29,8 +29,7 @@ files.each do |file|
   lang_name = LanguageSniffer.detect(file).language.name
   content = File.read(file)
 
-  # content = content.each_line.map { |line| line == "\n" || line == "\t\n" ? line : "\# " + line }.join('')
-  Commenter.new(content, lang_name)
+  change = Commenter.new(content, lang_name).apply
 
-  File.write(file, content)
+  File.write(file, change)
 end
